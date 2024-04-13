@@ -1,3 +1,4 @@
+# app/models/user.rb
 class User < ApplicationRecord
   # * ユーザーをデータベースに保存する前にemail属性を強制的に小文字に変換する
   # * これにより、大文字と小文字を区別しない一意性が保証される
@@ -15,8 +16,7 @@ class User < ApplicationRecord
                     uniqueness: true
                     # uniqueness: { case_sensitive: false }
 
+  # * 2つの仮想的な属性（passwordとpassword_confirmation）が使えるようになる
   has_secure_password
   validates :password, presence: true, length: { minimum: 6 }
 end
-
-# /Users/aokihirotaka/Documents/_programming/web_materials/ruby_on_rails_tutorial/sample_app/app/models/user.rb
