@@ -28,5 +28,7 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     follow_redirect!
     # * ユーザープロフィールに関するほぼ全て（例: ページにアクセスしたらなんらかの理由でエラーが発生しないかどうか）をテストできていることになります。この類のエンドツーエンドテストは、アプリケーションの重要な機能をカバーしてくれています。こういった理由が統合テストが便利だと呼ばれる所以です。
     assert_template 'users/show'
+    # flashメッセージが存在しないことを確認しています。
+    assert_not flash[:succsess]
   end
 end

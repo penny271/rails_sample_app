@@ -7,7 +7,16 @@
     <%# flash = { success: "It worked!", danger: "It failed." } %>
     <%# |message_type, message| は |key, value| に等しい  %>
     <% flash.each do |message_type, message| %>
+    <%
+=begin
+%>
+
       <div class="alert alert-<%= message_type %>"><%= message %></div>
+<%
+=end
+%>
+      <%= content_tag(:div, message, class: "alert alert-#{message_type}") %>  <%# 上と同じ %>
+
     <% end %>
     <%= render 'layouts/header' %>
     <div class="container">
