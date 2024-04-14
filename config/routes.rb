@@ -21,6 +21,9 @@ Rails.application.routes.draw do
   get  "/signup",  to: "users#new"
   resources :users
 
+  get '/login', to: 'sessions#new' # * ログインフォームのためのルーティング
+  post '/login', to: 'sessions#create' # * ログインのためのルーティング
+  delete '/logout', to: 'sessions#destroy' # * ログアウトのためのルーティング
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -22,7 +22,7 @@ class UsersController < ApplicationController
       # * 新しく作成されたユーザーのプロフィールページにリダイレクトする
       redirect_to @user
     else
-      flash[:error] = "Something went wrong"
+      flash[:danger] = "Something went wrong"
       # * 422 Unprocessable Entityに対応するもので、Turboを用いて通常のHTMLをレンダリングする場合に必要です。
       render 'new', status: :unprocessable_entity
     end

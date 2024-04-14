@@ -1,0 +1,25 @@
+<%# app/views/sessions/new.html.erb %>
+
+<% provide(:title, "Log in") %>
+<h1>Log in</h1>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+    <%# *`scope: :session`は、フォームのパラメータを名前空間化するためのオプションです。
+      これにより、生成されるパラメータは`session`キーの下に格納されます。
+      例えば、このフォームに`email`フィールドがある場合、送信されるパラメータは`session[email]`となります。 %>
+    <%= form_with(url: login_path, scope: :session) do |f| %>
+
+      <%= f.label :email %>
+      <%= f.email_field :email, class: 'form-control' %>
+      <%# * 生成されるhtml: <input class="form-control" type="email" name="session[email]" id="session_email"/>  %>
+
+      <%= f.label :password %>
+      <%= f.password_field :password, class: 'form-control' %>
+
+      <%= f.submit "Log in", class: "btn btn-primary" %>
+    <% end %>
+
+    <p>New user? <%= link_to "Sign up now!", signup_path %></p>
+  </div>
+</div>
