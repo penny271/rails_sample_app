@@ -77,6 +77,11 @@ class UserTest < ActiveSupport::TestCase
     @user.password = @user.password_confirmation = "a" * 5
     assert_not @user.valid?
   end
+
+  # * 記憶ダイジェストを持たないユーザーを用意し（setupメソッドで定義した@userインスタンス変数ではtrueになります）、続いてauthenticated?を呼び出します（リスト 9.18）。この中で、記憶トークンを空欄のままにしていることにご注目ください。記憶トークンが使われる前にエラーが発生するので、記憶トークンはどんな値でも構わないのです。
+  test "authenticated? should return false for a user with nil digest" do
+    assert_not @user.authenticated?('')
+  end
 end
 
 # このコードは、Ruby on Railsのモデルテストを定義しています。具体的には、Userモデルのテストを行っています。

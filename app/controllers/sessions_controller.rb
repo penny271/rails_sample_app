@@ -9,6 +9,9 @@ class SessionsController < ApplicationController
     if @user&.authenticate(params[:session][:password])
       # Log the user in and redirect to the user's show page.
       reset_session      # ログインの直前に必ずこれを書くこと (セッション固定攻撃対策)
+      # remember user      # app/helpers/sessions_helper.rb
+      # * Remember me機能の実装 (app/helpers/sessions_helper.rb) 画面からON/OFFできるようにしている
+      params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
       # * ログインする = session[:user_id]を設定する (app/helpers/sessions_helper.rb)
       log_in @user
       redirect_to @user # redirect_to user は redirect_to user_url(user) と同じ
@@ -25,7 +28,9 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    log_out # app/helpers/sessions_helper.rb
+    # log_out # app/helpers/sessions_helper.rb
+    # 2つのログイン済みのタブによるバグの修正
+    log_out if logged_in? # app/helpers/sessions_helper.rb
     # * RailsでTurboを使うときは、このように "303 See Other"ステータスを指定することで、DELETEリクエスト後のリダイレクトが正しく振る舞うようにする必要があります
     redirect_to root_url, status: :see_other
   end
