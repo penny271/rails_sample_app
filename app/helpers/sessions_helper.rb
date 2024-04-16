@@ -43,6 +43,11 @@ module SessionsHelper
     end
   end
 
+  # 渡されたユーザーがカレントユーザーであればtrueを返す
+  def current_user?(user)
+    user && user == current_user
+  end
+
   # 永続的セッションを破棄する
   def forget(user)
     user.forget # app/models/user.rb #remember_digestをnilに更新
@@ -61,5 +66,12 @@ module SessionsHelper
     forget(current_user)
     reset_session # Railsの組み込みメソッド
     @current_user = nil   # 安全のため
+  end
+
+  # アクセスしようとしたURLを保存する
+  # * フレンドリーフォワーディングのために、フレンドリーフォワーディングのURLを保存する
+  def store_location
+    # request.original_urlは、現在のリクエストの完全なURLを表す文字列を返すメソッド
+    session[:forwarding_url] = request.original_url if request.get?
   end
 end

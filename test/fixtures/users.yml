@@ -12,3 +12,31 @@ michael:
   name: Michael Example
   email: michael@example.com
   password_digest: <%= User.digest('password') %> # fixtureにはERBを書ける
+  admin: true # 管理者フラグを立てる
+
+# 正しいユーザーを要求する
+# * 当然のことですが、ログインを要求するだけでは十分ではありません。ユーザーが自分の情報だけを編集できるようにする必要があります。10.2.1では、深刻なセキュリティ上の欠陥を見逃してしまうテストを見てきました。
+# * まずはユーザーの情報が互いに編集できないことを確認するために、サンプルユーザーをもう一人追加します。ユーザー用のfixtureファイルに2人目のユーザーを追加してみましょう（リスト 10.23）。
+
+archer:
+  name: Sterling Archer
+  email: duchess@example.gov
+  password_digest: <%= User.digest('password') %> # fixtureにはERBを書ける
+
+lana:
+  name: Lana Kane
+  email: hands@example.gov
+  password_digest: <%= User.digest('password') %>
+
+malory:
+  name: Malory Archer
+  email: boss@example.gov
+  password_digest: <%= User.digest('password') %>
+
+# 30人のサンプルユーザーを作成する
+<% 30.times do |n| %>
+user_<%= n %>:
+  name:  <%= "User #{n}" %>
+  email: <%= "user-#{n}@example.com" %>
+  password_digest: <%= User.digest('password') %>
+<% end %>

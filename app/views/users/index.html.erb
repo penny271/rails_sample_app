@@ -1,0 +1,46 @@
+<% provide(:title, 'All users') %>
+<h1>All users</h1>
+
+<%= will_paginate %>
+
+<%# * Railsは@users をUserオブジェクトのリストであると推測します。さらに、renderにユーザーのコレクションを渡して呼び出すと、Railsは自動的にユーザーのコレクションを列挙し、それぞれのユーザーを_user.html.erbパーシャルで出力します。 %>
+<ul class="users">
+  <%= render @users %>
+</ul>
+
+<%# * 2回目: 下記のリファクタリング %>
+<%
+=begin
+%>
+
+<ul class="users">
+  <% @users.each do |user| %>
+    <%# * ここでは、renderをパーシャル（ファイル名の文字列）に対してではなく、Userクラスのuser変数に対して実行している点に注目してください。この場合、Railsは自動的に_user.html.erbという名前のパーシャルを探索するので、このパーシャルを作成する必要があります %>
+    <%= render user %>
+  <% end %>
+</ul>
+
+<%
+=end
+%>
+<%# * 1回目: 下記のリファクタリング %>
+
+<%
+=begin
+%>
+
+<ul class="users">
+  <% @users.each do |user| %>
+    <li>
+      <%= gravatar_for user, size: 50 %>
+      <%= link_to user.name, user %>
+    </li>
+  <% end %>
+</ul>
+
+<%
+=end
+%>
+
+
+<%= will_paginate %>

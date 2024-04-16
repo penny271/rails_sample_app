@@ -1,0 +1,14 @@
+<li>
+  <%= gravatar_for user, size: 50 %>
+  <%= link_to user.name, user %>
+  <%# * ユーザーindexページの各ユーザーに削除用のリンクを追加し、続いて管理ユーザーへのアクセスを制限します。これによって、現在のユーザーが管理者のときに限り［delete］リンクが表示されるようになります %>
+  <% if current_user.admin? && !current_user?(user) %>
+  | <%= link_to "delete", user, data: { "turbo-method": :delete,
+                                        turbo_confirm: "You sure?" } %>
+  <% end %>
+  <%# * link_toメソッドは、Ruby on Railsでリンクを生成するためのヘルパーメソッドです。このメソッドは最低でも2つの引数を取ります。最初の引数はリンクのテキスト（この場合は"delete"）、2番目の引数はリンクのURLです。ここではuserが2番目の引数として渡されており、これはRailsのルーティングが自動的にユーザーの詳細ページへのパスを生成するためです。 %>
+
+  <%# * 3番目の引数として、data属性を含むハッシュが渡されています。このdata属性はHTML5で導入されたもので、カスタムデータ属性を要素に追加することができます。このコードでは、"turbo-method"とturbo_confirmという2つのカスタムデータ属性が設定されています。 %>
+
+  <%# * "turbo-method": :deleteは、リンクがクリックされたときに実行するHTTPメソッドを指定します。この場合、:deleteメソッドが指定されているため、リンクがクリックされるとHTTP DELETEリクエストが発行され、対象のユーザーが削除されます。  %>
+</li>

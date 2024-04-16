@@ -1,0 +1,20 @@
+<%# * Railsは、ユーザーが新規なのか、それともデータベースに存在する既存のユーザーなのかを、Active Recordのnew_record?論理値メソッドで区別する。form_with(@user)を使ってフォームを構成すると、@user.new_record?がtrueの場合はPOSTを使い、falseの場合はPATCHを使います。 %>
+
+<%= form_with(model: @user) do |f| %>
+  <%= render 'shared/error_messages', object: @user %>
+
+  <%= f.label :name %>
+  <%= f.text_field :name, class: 'form-control' %>
+
+  <%= f.label :email %>
+  <%= f.email_field :email, class: 'form-control' %>
+
+  <%= f.label :password %>
+  <%= f.password_field :password, class: 'form-control' %>
+
+  <%= f.label :password_confirmation %>
+  <%= f.password_field :password_confirmation, class: 'form-control' %>
+
+  <%# * 本部分テンプレートの埋め込み元からの provide(:butten_text, 'xxx')で値を取得している %>
+  <%= f.submit yield(:button_text), class: "btn btn-primary" %>
+<% end %>
