@@ -25,6 +25,8 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#create' # * ログインのためのルーティング
   delete '/logout', to: 'sessions#destroy' # * ログアウトのためのルーティング
 
+  resources :account_activations, only: [:edit]
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
 end

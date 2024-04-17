@@ -1,3 +1,5 @@
+# app/controllers/users_controller.rb
+
 class UsersController < ApplicationController
   # ユーザーのindexページはログインしたユーザーにしか見せないようにし、未登録のユーザーがデフォルトで表示できるページを制限します
   before_action :logged_in_user, only: [:index, :edit, :update, :destroy]
@@ -8,7 +10,9 @@ class UsersController < ApplicationController
   def index
     # @users = User.all
     # * ページネーションを追加
-    @users = User.paginate(page: params[:page])
+    # @users = User.where(activated: true).paginate(page: params[:page])
+    # メール認証にてすでに有効なユーザーのみを取得する
+    @users = User.where(activated: true).paginate(page: params[:page])
   end
 
 
@@ -17,6 +21,8 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     # binding.pry
     # debugger
+    # * ユーザーが有効化されていない場合は、トップページにリダイレクトする
+    redirect_to root_url and return unless @user.activated?
   end
 
   def new
@@ -30,9 +36,14 @@ class UsersController < ApplicationController
     # @user = User.new(name: "Foo Bar", email: "foo@invalid",
     # password: "foo", password_confirmation: "bar")
     if @user.save
-      flash[:success] = "Welcome to the Sample App!"
-      # * 新しく作成されたユーザーのプロフィールページにリダイレクトする
-      redirect_to @user
+      # *ユーザー登録にアカウント有効化を追加する(メールにて有効化できるようにする)
+      # UserMailer.account_activation(@user).deliver_now
+      @user.send_activation_email # 上記を user.rbで呼び出し、有効化用のメールを送信する
+      flash[:info] = "Please check your email to activate your account."
+      redirect_to root_url
+      # flash[:success] = "Welcome to the Sample App!"
+      # # * 新しく作成されたユーザーのプロフィールページにリダイレクトする
+      # redirect_to @user
     else
       flash[:danger] = "Something went wrong"
       # * 422 Unprocessable Entityに対応するもので、Turboを用いて通常のHTMLをレンダリングする場合に必要です。

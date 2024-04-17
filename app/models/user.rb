@@ -1,11 +1,16 @@
 # app/models/user.rb
 class User < ApplicationRecord
-  attr_accessor :remember_token # * 仮想の属性を作成する
+  attr_accessor :remember_token, :activation_token # * 仮想の属性を作成する
 
   # * ユーザーをデータベースに保存する前にemail属性を強制的に小文字に変換する
   # * これにより、大文字と小文字を区別しない一意性が保証される
   # before_save { self.email = email.downcase }
-  before_save { email.downcase! } # * この行は上の行と同じ意味 直接変更することができる
+  # before_save { email.downcase! } # * この行は上の行と同じ意味 直接変更することができる
+  # * 上記をメソッド参照に書き換えた
+  before_save   :downcase_email # オブジェクトが新規に作成される場合も更新される場合も実行される
+  # オブジェクトが新規に作成されてデータベースに初めて保存される直前にのみ実行される
+  before_create :create_activation_digest
+
   # validates ${:attribute}, presence: true
   # validates(:name, presence: true)
   # validates('name', 'email', {presence: true}) # * 文字列でもシンボルでもOK
@@ -51,13 +56,55 @@ class User < ApplicationRecord
   end
 
   # 渡されたトークンがダイジェストと一致したらtrueを返す(Remember me機能のため) * インスタンスメソッド
-  def authenticated?(remember_token)
-    return false if remember_digest.nil? # * remember_digest ダイジェストが存在しない場合に対応 後続でnilによるエラーを回避
-    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  # def authenticated?(remember_token)
+  #   return false if remember_digest.nil? # * remember_digest ダイジェストが存在しない場合に対応 後続でnilによるエラーを回避
+  #   BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  # end
+
+  # 渡されたトークンがダイジェストと一致したらtrueを返す
+  # 上記の関数をメタプログラミングでリファクタリング
+  def authenticated?(attribute, token)
+    # digest = self.send("#{attribute}_digest")
+    # * このコードはUserモデル内にあるのでselfは省略可能です。
+    digest = send("#{attribute}_digest") # * userモデルの属性の値を動的に取得する
+    return false if digest.nil?
+    BCrypt::Password.new(digest).is_password?(token)
   end
 
   # ユーザーのログイン情報を破棄する * インスタンスメソッド
   def forget
     update_attribute(:remember_digest, nil)
   end
+
+  # アカウントを有効にする
+  def activate
+    # * validationを避けるため2回update_attributeを呼び出している
+    # self.update_attribute(:activated,    true)
+    # self.update_attribute(:activated_at, Time.zone.now)
+
+    # update_attribute(:activated,    true)
+    # update_attribute(:activated_at, Time.zone.now)
+
+    # * 上記を一つにまとめて書くことのできるメソッド
+    update_columns(activated: true, activated_at: Time.zone.now)
+  end
+
+  # 有効化用のメールを送信する
+  def send_activation_email
+    UserMailer.account_activation(self).deliver_now
+  end
+
+  private
+
+    # メールアドレスをすべて小文字にする
+    def downcase_email
+      # self.email = email.downcase
+      email.downcase! # * この行は上の行と同じ意味 直接変更することができる
+    end
+
+    # 有効化トークンとダイジェストを作成および代入する
+    def create_activation_digest
+      self.activation_token  = User.new_token
+      self.activation_digest = User.digest(activation_token)
+    end
 end

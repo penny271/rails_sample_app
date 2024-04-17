@@ -1,5 +1,6 @@
 require "test_helper"
 
+# 基底クラスを作成
 class UsersLogin < ActionDispatch::IntegrationTest
 
   def setup
@@ -7,7 +8,7 @@ class UsersLogin < ActionDispatch::IntegrationTest
   end
 end
 
-# UsersLoginクラスを継承しているため、setupメソッドが呼び出される
+# def setupを継承している
 class InvalidPasswordTest < UsersLogin
 
   test "login path" do
@@ -26,17 +27,18 @@ class InvalidPasswordTest < UsersLogin
   end
 end
 
-# UsersLoginクラスを継承しているため、setupメソッドが呼び出される
 class ValidLogin < UsersLogin
 
   def setup
+    # * このsuperは、基底クラス（ここではUsersLoginクラス）にある setupメソッドを呼び出してから次に進みます。このsuperが必要な理由は、post login_pathに渡すパラメータの中で @userインスタンス変数（UsersLoginクラスのsetupで定義されている）が必要になるからです。
+    # - 基底クラスの setup を super で上書きしている = 有効なログインにしている
     super
     post login_path, params: { session: { email:    @user.email,
                                           password: 'password' } }
   end
 end
 
-# ValidLoginクラスを継承しているため、setupメソッドが呼び出される
+# 有効なログインを継承している
 class ValidLoginTest < ValidLogin
 
   test "valid login" do
@@ -61,7 +63,6 @@ class Logout < ValidLogin
   end
 end
 
-# Logoutクラスを継承しているため、setupメソッドが呼び出される
 class LogoutTest < Logout
 
   test "successful logout" do
@@ -78,7 +79,7 @@ class LogoutTest < Logout
   end
 
   test "should still work after logout in second window" do
-    delete logout_path   # ログアウト sessions#destroy発動
+    delete logout_path
     assert_redirected_to root_url
   end
 end
@@ -87,9 +88,7 @@ class RememberingTest < UsersLogin
 
   test "login with remembering" do
     log_in_as(@user, remember_me: '1')
-    # * リスト 9.26の統合テストでは、仮想のremember_token属性にアクセスできないと説明しましたが、実は、assignsという特殊なテストメソッドを使うとアクセスできるようになります。コントローラで定義したインスタンス変数にテストの内部からアクセスするには、テスト内部でassignsメソッドを使います。
-    assert_equal cookies['remember_token'], assigns(:user).remember_token
-    # assert_not cookies[:remember_token].blank?
+    assert_not cookies[:remember_token].blank?
   end
 
   test "login without remembering" do

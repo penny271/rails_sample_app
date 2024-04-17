@@ -36,7 +36,9 @@ module SessionsHelper
     elsif (user_id = cookies.encrypted[:user_id])
       # raise       # テストがパスすれば、この部分がテストされていないことがわかる
       user = User.find_by(id: user_id)
-      if user && user.authenticated?(cookies[:remember_token])
+      # if user && user.authenticated?(cookies[:remember_token])
+      # * 第一引数で動的に xxx_digest の属性値を変更できるようにしている
+      if user && user.authenticated?(:remember, cookies[:remember_token])
         log_in user
         @current_user = user
       end

@@ -1,0 +1,16 @@
+Hi <%= @user.name %>,
+
+■ Welcome to the Sample App! Click on the link below to activate your account:
+
+<%#
+# FILEPATH: /Users/aokihirotaka/Documents/_programming/web_materials/ruby_on_rails_tutorial/sample_app/app/views/user_mailer/account_activation.text.erb
+#
+# This template is used for the account activation email.
+# It generates a URL for the user to activate their account.
+#
+# Parameters:
+# - @user: The user object containing the activation token and email.
+#
+# Example usage:
+# <%= edit_account_activation_url(@user.activation_token, email: @user.email) %>
+<%= edit_account_activation_url(@user.activation_token, email: @user.email) %>

@@ -1,9 +1,16 @@
 require "test_helper"
 
-class UsersSignupTest < ActionDispatch::IntegrationTest
+class UsersSignup < ActionDispatch::IntegrationTest
+
+  # Rubyの配列に対してclearメソッドを呼び出すと、配列の全ての要素が削除され、空の配列（[]）になります。
+  def setup
+    ActionMailer::Base.deliveries.clear
+  end
+end
+
+class UsersSignupTest < UsersSignup
 
   test "invalid signup information" do
-    get signup_path
     assert_no_difference 'User.count' do
       post users_path, params: { user: { name:  "",
                                          email: "user@invalid",
@@ -12,23 +19,56 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     end
     assert_response :unprocessable_entity
     assert_template 'users/new'
-    # エラーメッセージをテストするためのテンプレート
     assert_select 'div#error_explanation'
-    assert_select 'div.alert.alert-danger'
+    assert_select 'div.field_with_errors'
   end
 
-  # 有効なユーザー登録に対するテスト
-  test "valid signup information" do
+  test "valid signup information with account activation" do
     assert_difference 'User.count', 1 do
       post users_path, params: { user: { name:  "Example User",
                                          email: "user@example.com",
                                          password:              "password",
                                          password_confirmation: "password" } }
     end
+    assert_equal 1, ActionMailer::Base.deliveries.size
+  end
+end
+
+class AccountActivationTest < UsersSignup
+
+  def setup
+    super
+    post users_path, params: { user: { name:  "Example User",
+                                       email: "user@example.com",
+                                       password:              "password",
+                                       password_confirmation: "password" } }
+    @user = assigns(:user)
+  end
+
+  test "should not be activated" do
+    assert_not @user.activated?
+  end
+
+  test "should not be able to log in before account activation" do
+    log_in_as(@user)
+    assert_not is_logged_in?
+  end
+
+  test "should not be able to log in with invalid activation token" do
+    get edit_account_activation_path("invalid token", email: @user.email)
+    assert_not is_logged_in?
+  end
+
+  test "should not be able to log in with invalid email" do
+    get edit_account_activation_path(@user.activation_token, email: 'wrong')
+    assert_not is_logged_in?
+  end
+
+  test "should log in successfully with valid activation token and email" do
+    get edit_account_activation_path(@user.activation_token, email: @user.email)
+    assert @user.reload.activated?
     follow_redirect!
-    # * ユーザープロフィールに関するほぼ全て（例: ページにアクセスしたらなんらかの理由でエラーが発生しないかどうか）をテストできていることになります。この類のエンドツーエンドテストは、アプリケーションの重要な機能をカバーしてくれています。こういった理由が統合テストが便利だと呼ばれる所以です。
     assert_template 'users/show'
-    # flashメッセージが存在しないことを確認しています。
-    assert_not flash[:succsess]
+    assert is_logged_in?
   end
 end
