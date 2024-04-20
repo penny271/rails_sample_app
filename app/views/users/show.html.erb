@@ -9,4 +9,14 @@
       </h1>
     </section>
   </aside>
+  <div class="col-md-8">
+    <% if @user.microposts.any? %>
+      <h3>Microposts (<%= @user.microposts.count %>)</h3>
+      <ol class="microposts">
+        <%= render @microposts %>
+      </ol>
+      <%# * will_paginateが、Usersコントローラのコンテキストにおいて、@usersインスタンス変数が存在していることを前提としているためです。このインスタンス変数は、10.3.3でも述べたようにActiveRecord::Relationクラスのインスタンスです。今回の場合はUsersコントローラのコンテキストからマイクロポストをページネーションしたいため、コンテキストが異なる@microposts変数を明示的にwill_paginateに渡す必要があります。 %>
+      <%= will_paginate @microposts %>
+    <% end %>
+  </div>
 </div>

@@ -1,0 +1,17 @@
+<%= form_with(model: @micropost) do |f| %>
+  <%# * フォーム変数fをf.objectとすることによって、関連付けられたオブジェクトにアクセスすることができます。したがって、 %>
+  <%# form_with(model: @user) do |f|
+  上のようにf.objectが @user となる場合と、
+  form_with(model: @micropost) do |f|
+  上のようにf.objectが @micropost になる場合などがあります。  %>
+  <%= render 'shared/error_messages', object: f.object %>
+  <div class="field">
+    <%= f.text_area :content, placeholder: "Compose new micropost..." %>
+  </div>
+  <%= f.submit "Post", class: "btn btn-primary" %>
+  <%# * マイクロポストのcreateフォームに画像アップロードを追加する %>
+  <span class="image">
+    <%# * acceptオプション自体はRails固有のメソッドではなく、HTMLの<input>要素で使用される標準の属性です。この属性は、フォームでファイルをアップロードする際に、ユーザーが選択できるファイルのタイプを指定するために使われます。accept属性には、特定のファイルタイプを示すMIMEタイプをカンマ区切りで指定します。 %>
+    <%= f.file_field :image, accept: "image/jpeg,image/gif,image/png" %>
+  </span>
+<% end %>

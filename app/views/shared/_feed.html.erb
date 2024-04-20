@@ -1,0 +1,55 @@
+<%# ステータスフィードのパーシャル %>
+<%# app/views/shared/_feed.html.erb %>
+
+
+<%
+=begin
+%>
+
+  <%# * @feed_itemsの各要素がMicropostクラスを持っていたため、RailsはMicropostのパーシャルを呼び出すことができました。このように、Railsは対応する名前のパーシャルを、渡されたリソースのディレクトリ内から探索します。 %>
+  <%# - Railsでは、コレクションをrenderメソッドに渡すと、そのコレクションの各要素に対して自動的に対応するパーシャルを探してレンダリングします。 %>
+
+  <%# - この場合、<%= render @feed_items %>は、@feed_itemsに含まれる各要素（このコンテキストではMicropostオブジェクトの配列）に対応するパーシャルをレンダリングします。 %>
+  <%#  - @feed_itemsがMicropostクラスのインスタンスの配列であるため、RailsはMicropostに対応するパーシャルを探します。Railsの規約に従うと、このパーシャルはapp/views/microposts/_micropost.html.erbに配置されている必要があります %>
+
+<%
+=end
+%>
+
+
+<% if @feed_items.any? %>
+  <ol class="microposts">
+    <%= render @feed_items %>
+  </ol>
+
+<%
+=begin
+%>
+  下記だと うまくいかない
+  createアクションでリダイレクトされたとき、リダイレクト先の
+  URLは/microposts?page=2になりますし、クリックするとMicropostsコントローラに存在しないindexアクションにアクセスしようとし、
+  microposts#indexは、存在しないためエラーが発生する
+  詳細は、13.51 を参照
+  <%= will_paginate @feed_items %>
+<%
+=end
+%>
+
+<%# * この問題は、Homeページに対応するcontrollerパラメータとaction パラメータを明示的にwill_paginateに渡すことで解決できます。 %>
+<%= will_paginate @feed_items,
+                  params: { controller: :static_pages, action: :home } %>
+<% end %>
+
+<%
+=begin
+%>
+
+    <%# * @feed_itemsの各要素がMicropostクラスを持っていたため、RailsはMicropostのパーシャルを呼び出すことができました。このように、Railsは対応する名前のパーシャルを、渡されたリソースのディレクトリ内から探索します。 %>
+    <%# - Railsでは、コレクションをrenderメソッドに渡すと、そのコレクションの各要素に対して自動的に対応するパーシャルを探してレンダリングします。 %>
+
+    <%# - この場合、<%= render @feed_items %>は、@feed_itemsに含まれる各要素（このコンテキストではMicropostオブジェクトの配列）に対応するパーシャルをレンダリングします。 %>
+    <%#  - @feed_itemsがMicropostクラスのインスタンスの配列であるため、RailsはMicropostに対応するパーシャルを探します。Railsの規約に従うと、このパーシャルはapp/views/microposts/_micropost.html.erbに配置されている必要があります %>
+
+<%
+=end
+%>

@@ -21,6 +21,8 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     # binding.pry
     # debugger
+    # * 今回の場合はUsersコントローラのコンテキストからマイクロポストをページネーションしたいため、コンテキストが異なる@microposts変数を明示的にwill_paginateに渡す必要があります。したがって、そのようなインスタンス変数をUsersコントローラのshowアクションで定義しなければなりません（
+    @microposts = @user.microposts.paginate(page: params[:page])
     # * ユーザーが有効化されていない場合は、トップページにリダイレクトする
     redirect_to root_url and return unless @user.activated?
   end
@@ -83,15 +85,16 @@ class UsersController < ApplicationController
     # beforeフィルタ
 
     # ログイン済みユーザーかどうか確認
-    def logged_in_user
-      puts("before_action :logged_in_user, only: [:edit, :update]でログイン済みユーザーかどうか確認する")
-      unless logged_in?
-        # フレンドリーフォワーディングのURL(当初飛びたかったpageのurl)を保存する
-        store_location # app/helpers/sessions_helper.rb
-        flash[:danger] = "Please log in."
-        redirect_to login_url, status: :see_other
-      end
-    end
+    # - microposts_controllerでも共通で使うため、application_controller.rbに記述し直したので重複しないようにコメントアウト
+    # def logged_in_user
+    #   puts("before_action :logged_in_user, only: [:edit, :update]でログイン済みユーザーかどうか確認する")
+    #   unless logged_in?
+    #     # フレンドリーフォワーディングのURL(当初飛びたかったpageのurl)を保存する
+    #     store_location # app/helpers/sessions_helper.rb
+    #     flash[:danger] = "Please log in."
+    #     redirect_to login_url, status: :see_other
+    #   end
+    # end
 
     # 正しいユーザーかどうか確認
     def correct_user

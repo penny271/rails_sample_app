@@ -1,3 +1,21 @@
+<%# * @user から partialの呼び出し元から渡されてくる 変数 object に変更(@user を使う場合も @micropost を使う場合もあるためこのように柔軟性を持たせている) %>
+<% if object.errors.any? %>
+  <div id="error_explanation">
+    <div class="alert alert-danger">
+      The form contains <%= pluralize(object.errors.count, "error") %>.
+    </div>
+    <ul>
+    <% object.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%
+=begin
+%>
+
 <% if @user.errors.any? %>
   <div id="error_explanation">
     <div class="alert alert-danger">
@@ -10,3 +28,7 @@
     </ul>
   </div>
 <% end %>
+
+<%
+=end
+%>

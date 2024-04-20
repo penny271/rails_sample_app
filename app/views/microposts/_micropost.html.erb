@@ -1,0 +1,47 @@
+<%
+=begin
+%>
+
+# <%= render 'shared/feed' %> で呼び出されるパーシャル
+
+<%
+=end
+%>
+
+<%# app/views/microposts/_micropost.html.erb %>
+
+
+<%
+=begin
+%>
+
+はい、その通りです。<%= render @feed_items %>で@feed_itemsをレンダリングする際、@feed_itemsの各要素（この場合はMicropostオブジェクトのインスタンス）がapp/views/microposts/_micropost.html.erbパーシャルに渡されます。このパーシャル内で使用されるmicropost変数は、@feed_itemsの各要素を参照しています。
+
+Railsのrenderメソッドは、コレクションの各要素に対して指定されたパーシャルを反復処理でレンダリングする際に、その要素をパーシャルのローカル変数に自動的に割り当てます。この場合、@feed_itemsコレクションの各Micropostインスタンスは、_micropost.html.erbパーシャル内のmicropost変数として利用可能になります。
+
+<%
+=end
+%>
+
+<%# -  micropostに何が入っているかは、上記を確認する!! %>
+<li id="micropost-<%= micropost.id %>">
+  <%= link_to gravatar_for(micropost.user, size: 50), micropost.user %>
+  <span class="user"><%= link_to micropost.user.name, micropost.user %></span>
+  <span class="content">
+    <%= micropost.content %>
+    <% if micropost.image.attached? %>
+      <%# image_tagヘルパーを用いて、関連付けられたmicropost.imageをレンダリングできるようになります %>
+      <%# * micropost.rbで 定義したバリアント（サイズ違いの別画像）をマイクロポストのパーシャルで利用できるようになります %>
+      <%= image_tag micropost.image.variant(:display) %>
+    <% end %>
+  </span>
+  <span class="timestamp">
+    <%# * time_ago_in_wordsはrailsが元から用意している　helperメソッド = そのまま使える %>
+    Posted <%= time_ago_in_words(micropost.created_at) %> ago.
+    <%# * 自分のした投稿に対してのみ deleteリンクを表示させる %>
+    <% if current_user?(micropost.user) %>
+      <%= link_to "delete", micropost, data: { "turbo-method": :delete,
+                                               turbo_confirm: "You sure?" } %>
+    <% end %>
+  </span>
+</li>

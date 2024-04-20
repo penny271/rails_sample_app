@@ -1,5 +1,8 @@
 # app/models/user.rb
 class User < ApplicationRecord
+  # * 1つのユーザーが複数のマイクロポストを持つ
+  has_many :microposts, dependent: :destroy
+
   attr_accessor :remember_token, :activation_token, :reset_token # * 仮想の属性を作成する
 
   # * ユーザーをデータベースに保存する前にemail属性を強制的に小文字に変換する
@@ -118,6 +121,13 @@ class User < ApplicationRecord
     reset_sent_at < 2.hours.ago
   end
 
+  # 試作feedの定義 = feedとは自分の投稿のことですでに存在する投稿
+  # 完全な実装は次章の「ユーザーをフォローする」を参照
+  def feed
+    # self.microposts  # テーブルのuser_idカラムにidが一致するものを取得
+    # microposts  # テーブルのuser_idカラムにidが一致するものを取得 selfは省略可能
+    Micropost.where("user_id = ?", id) # 上記と同じ意味
+  end
 
   private
 

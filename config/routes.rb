@@ -26,9 +26,15 @@ Rails.application.routes.draw do
   delete '/logout', to: 'sessions#destroy' # * ログアウトのためのルーティング
 
   resources :account_activations, only: [:edit]
-
   resources :password_resets, only: [:new, :create, :edit, :update]
+  # * Micropostsリソースへのインターフェイスは主にプロフィールページとHomeページのコントローラを経由して実行されるので、Micropostsコントローラにはnewやeditのようなアクションは不要です。
+  resources :microposts, only: [:create, :destroy]
+  # railsの不具合:本チュートリアル執筆時点では、無効なマイクロポストを送信した後にブラウザ画面を再読み込みすると、一部のブラウザ（Chromeなど）でNo route matches [GET] "/microposts"エラーが発生します。この場合、このルーティングを追加することでエラーを修正できます。
+  get '/microposts', to: 'static_pages#home'
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  # ! 確認用　要削除
+  resources :photos
 
 end
