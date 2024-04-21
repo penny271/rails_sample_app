@@ -25,6 +25,13 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#create' # * ログインのためのルーティング
   delete '/logout', to: 'sessions#destroy' # * ログアウトのためのルーティング
 
+  # * memberメソッド
+  resources :users do
+    member do
+      get :following, :followers
+    end
+  end
+
   resources :account_activations, only: [:edit]
   resources :password_resets, only: [:new, :create, :edit, :update]
   # * Micropostsリソースへのインターフェイスは主にプロフィールページとHomeページのコントローラを経由して実行されるので、Micropostsコントローラにはnewやeditのようなアクションは不要です。
@@ -32,9 +39,20 @@ Rails.application.routes.draw do
   # railsの不具合:本チュートリアル執筆時点では、無効なマイクロポストを送信した後にブラウザ画面を再読み込みすると、一部のブラウザ（Chromeなど）でNo route matches [GET] "/microposts"エラーが発生します。この場合、このルーティングを追加することでエラーを修正できます。
   get '/microposts', to: 'static_pages#home'
 
+  # フォロー、アンフォローの機能を実装する
+  resources :relationships,       only: [:create, :destroy]
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # ! 確認用　要削除
   resources :photos
+
+  # ! 確認用　要削除
+  # * memberメソッドを使うとユーザーidを含むURLを扱うようになりますが、 idを指定せずにすべてのメンバーを表示するには、次のようにcollectionメソッドを使います。
+  resources :users do
+    collection do
+      get :tigers
+    end
+  end
 
 end

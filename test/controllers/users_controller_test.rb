@@ -61,6 +61,16 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :see_other
     assert_redirected_to root_url
   end
+
+  test "should redirect following when not logged in" do
+    get following_user_path(@user)
+    assert_redirected_to login_url
+  end
+
+  test "should redirect followers when not logged in" do
+    get followers_user_path(@user)
+    assert_redirected_to login_url
+  end
 end
 
 # beforeフィルターはアクションごとに適用されるので、Usersコントローラのテストもアクションごとに書きます。具体的には、正しい種類のHTTPリクエストを使ってeditアクションとupdateアクションをそれぞれ実行し、flashにメッセージが代入されたかどうか、ログイン画面にリダイレクトされたかどうかを確認してみましょう。

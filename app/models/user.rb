@@ -2,6 +2,34 @@
 class User < ApplicationRecord
   # * 1つのユーザーが複数のマイクロポストを持つ
   has_many :microposts, dependent: :destroy
+  # * 1つのユーザーが複数のアクティビティを持つ フォロー機能のため
+  # * has_many側にforeign_keyを指定することで、Userモデルのidカラムとfollower_idカラムを関連付ける
+  has_many :active_relationships, class_name:  "Relationship",
+  # sqlで複数の同じ外部キーからそれに対応するレコードを取得することで一括で自分がフォローしている人のレコードを取得できる
+                                  foreign_key: "follower_id",
+                                  dependent:   :destroy
+
+  has_many :passive_relationships, class_name:  "Relationship",
+  # sqlで複数の同じ外部キーからそれに対応するレコードを取得することで一括で自分をフォローしている人のレコードを取得できる
+                                  foreign_key: "followed_id",
+                                  dependent:   :destroy
+
+  # * 1つのユーザーが複数のアクティビティを持つ フォロー機能のため
+  # * :sourceパラメーターを使って、「following配列の出どころ（source）はfollowed idのコレクションである」ことを明示的にRailsに伝える
+  # - この行は、「ユーザーがフォローしている人々（following）」を取得するためのアソシエーションです。ここでは、active_relationshipsを介して、具体的にはRelationshipテーブルのfollowed_idを通じて、フォローしているユーザーを参照します。
+
+  # - source: :followedは、active_relationshipsアソシエーションを通じて参照される先（つまり「フォローされているユーザー」を指すRelationshipレコードのfollowed_idフィールド）を指定します。この設定により、Userモデルのインスタンス（user）に対してuser.followingを呼び出すと、そのユーザーによってフォローされている全てのユーザーのリストが返されます。
+  #  ! source: :followedは、has_many :following, through: :active_relationshipsアソシエーションを定義する際に、最終的に取得したいレコード（つまり、フォローしているユーザー）を指定しています。
+  has_many :following, through: :active_relationships, source: :followed # フォローする側(follower_id)から見ている
+  # - user.following.include?(other_user) が使えるようになる
+  # - user.following.find(other_user) が使えるようになる
+  # * 誰にフォローされているかを知りたい　
+  # 規約に則っているので、下記のsourceは省略可能
+  has_many :followers, through: :passive_relationships, source: :follower # フォローされる側(followed_id)から見ている
+
+  # * どう考えればいいか
+  # フォローする側（active_relationships）：自分が他の人をフォローする場合、自分はその関係のfollowerです。そのため、foreign_keyは自分のIDを示すfollower_idです。
+  # フォローされる側（passive_relationships）：自分が他の人からフォローされる場合、自分はその関係のfollowedです。そのため、foreign_keyは自分のIDを示すfollowed_idです。
 
   attr_accessor :remember_token, :activation_token, :reset_token # * 仮想の属性を作成する
 
@@ -126,7 +154,34 @@ class User < ApplicationRecord
   def feed
     # self.microposts  # テーブルのuser_idカラムにidが一致するものを取得
     # microposts  # テーブルのuser_idカラムにidが一致するものを取得 selfは省略可能
-    Micropost.where("user_id = ?", id) # 上記と同じ意味
+    # Micropost.where("user_id = ?", id) # 上記と同じ意味
+    # - 自分のフィードしか表示できてなかったのを、自分の投稿とフォローしているユーザーの投稿も表示できるようにする
+    # * following_idsは、has_many :following関連付けを行うとActive Recordによって自動生成されるメソッドです（リスト 14.8）。これにより、関連付けの名前の末尾に_idsを足すだけで、user.followingコレクションに対応するidの配列を取得できます。
+    # Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id)
+    #  * 上記をSQLのサブセレクトで効率化したもの
+    following_ids = "SELECT followed_id FROM relationships
+                     WHERE  follower_id = :user_id"
+    Micropost.where("user_id IN (#{following_ids})
+                     OR user_id = :user_id", user_id: id)
+                     .includes(:user, image_attachment: :blob) # * 画像をプリロードする
+  end
+
+  # ユーザーをフォローする
+  def follow(other_user)
+    # user自身を表すオブジェクトのselfは可能な限り省略している
+    following << other_user unless self == other_user
+  end
+
+  # ユーザーをフォロー解除する
+  def unfollow(other_user)
+    # user自身を表すオブジェクトのselfは可能な限り省略している
+    following.delete(other_user)
+  end
+
+  # 現在のユーザーが他のユーザーをフォローしていればtrueを返す
+  def following?(other_user)
+    # user自身を表すオブジェクトのselfは可能な限り省略している
+    following.include?(other_user)
   end
 
   private
