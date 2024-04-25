@@ -46,6 +46,7 @@ Rails.application.routes.draw do
 
   # ! 確認用　要削除
   resources :photos
+  resources :cans
 
   # ! 確認用　要削除
   # * memberメソッドを使うとユーザーidを含むURLを扱うようになりますが、 idを指定せずにすべてのメンバーを表示するには、次のようにcollectionメソッドを使います。
@@ -56,3 +57,4 @@ Rails.application.routes.draw do
   end
 
 end
+
